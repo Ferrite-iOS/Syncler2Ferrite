@@ -1,0 +1,20 @@
+{
+  "name": "ts-base",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^22.7.4",
+    "@typescript-eslint/eslint-plugin": "^8.8.0",
+    "@typescript-eslint/parser": "^8.8.0",
+    "eslint": "^9.12.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.2"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/main.js"
+  },
+  "packageManager": "pnpm@8.6.3"
+}

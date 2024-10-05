@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "outDir": "dist",
+    "sourceMap": true,
+    "allowJs": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "skipLibCheck": true,
+    "importHelpers": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src/**/*"],
+}
