@@ -15,7 +15,7 @@ export interface WakoManifest {
 export interface WakoSource {
     name: string;
     base_url: string;
-    fallback_urls?: string;
+    fallback_urls?: Array<string>;
     response_type: 'json' | 'text';
     source_is_in_sub_page?: boolean;
     movie?: WakoCategory;

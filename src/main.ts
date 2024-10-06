@@ -71,6 +71,10 @@ async function main() {
             website: wakoSource.base_url
         };
 
+        if (wakoSource.fallback_urls) {
+            ferriteSource.fallbackUrls = wakoSource.fallback_urls;
+        }
+
         let searchQuery = '';
         const searchUrlKeys: Array<keyof WakoSource> = ['movie', 'episode', 'season', 'anime'];
         for (const key of searchUrlKeys) {

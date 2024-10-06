@@ -9,6 +9,7 @@ export interface FerriteSource {
     version: number;
     minVersion: string;
     website: string;
+    fallbackUrls?: Array<string>;
     trackers?: Array<string>;
     api?: FerriteApiInfo;
     jsonParser?: FerriteJsonParser;
