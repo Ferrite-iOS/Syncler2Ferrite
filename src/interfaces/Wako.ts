@@ -1,5 +1,15 @@
-export interface WakoList {
+interface WakoSources {
     [key: string]: WakoSource;
+}
+
+export type WakoList = {
+    _manifest?: WakoManifest;
+} & Omit<WakoSources, '_manifest'>;
+
+// Manifest isn't a thing in Helios's source code, but some lists have them
+export interface WakoManifest {
+    name?: string;
+    id?: string;
 }
 
 export interface WakoSource {
@@ -25,9 +35,9 @@ export interface WakoApiParser {
     sub_results?: string;
     url?: string;
     title: string;
-    seeds: string;
-    peers: string;
-    size: string;
+    seeds?: string;
+    peers?: string;
+    size?: string;
     quality?: string;
     isPackage?: string;
     hash?: string;
@@ -37,9 +47,9 @@ export interface WakoHtmlParser {
     row: string;
     url: string;
     title: string;
-    seeds: string;
-    peers: string;
-    size: string;
+    seeds?: string;
+    peers?: string;
+    size?: string;
     isPackage?: string;
     hash?: string;
 }

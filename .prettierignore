@@ -5,3 +5,6 @@ yarn.lock
 tsconfig.json
 .github/workflows
 dist/
+
+ferriteOutput.yml
+wako_input.json

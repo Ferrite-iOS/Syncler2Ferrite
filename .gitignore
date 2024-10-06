@@ -49,3 +49,7 @@ node_modules/
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
+
+# Input/output files
+ferriteOutput.yml
+wako_input.json

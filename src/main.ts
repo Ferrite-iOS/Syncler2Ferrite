@@ -10,7 +10,17 @@ import {
 } from './interfaces/Ferrite.js';
 import { WakoList, WakoCategory, WakoSource } from './interfaces/Wako.js';
 
-function extractCssSelector(input: string) {
+function cleanNewlines(input: string) {
+    return input.replace(/(\r\n|\n|\r)/gm, ' ');
+}
+
+// Extracts a CSS selector and attributes from a given JS function string
+// Returned as a FerriteComplexQuery since it's a unified type for this purpose
+function extractCssSelector(input?: string) {
+    if (!input) {
+        return;
+    }
+
     const queryPattern = /querySelector\('([^']+)'\)/;
     const queryAllPattern = /querySelectorAll\('([^']+)'\)/;
     const attributePattern = /getAttribute\('([^']+)'\)/;
@@ -19,7 +29,7 @@ function extractCssSelector(input: string) {
     const queryAllMatch = queryAllPattern.exec(input);
 
     if (!(queryMatch || queryAllMatch)) {
-        return
+        return;
     }
 
     const queryResult = queryMatch?.[1] ?? queryAllMatch?.[1];
@@ -44,15 +54,21 @@ function extractCssSelector(input: string) {
 async function main() {
     const finalSources: Array<FerriteSource> = [];
     const inputText = await fs.readFile('wako_input.json', 'utf-8');
-    const inputJson: WakoList = JSON.parse(inputText);
-    for (const sourceName of Object.keys(inputJson)) {
-        const sourceOptions = inputJson[sourceName];
+    const wakoProviderJson: WakoList = JSON.parse(inputText);
+
+    // Manifest entry
+    const wakoManifest = wakoProviderJson._manifest;
+    delete wakoProviderJson._manifest;
+
+    // Sources
+    for (const sourceName of Object.keys(wakoProviderJson)) {
+        const wakoSource = wakoProviderJson[sourceName];
 
         let ferriteSource: FerriteSource = {
-            name: sourceOptions.name,
+            name: wakoSource.name,
             version: 1,
             minVersion: '0.7.2',
-            website: sourceOptions.base_url
+            website: wakoSource.base_url
         };
 
         let searchQuery = '';
@@ -62,13 +78,13 @@ async function main() {
                 break;
             }
 
-            const category = sourceOptions[key] as WakoCategory | undefined;
+            const category = wakoSource[key] as WakoCategory | undefined;
             searchQuery = category?.query ?? '';
         }
 
         // HTML parser
-        if (sourceOptions.html_parser) {
-            const wakoHtmlParser = sourceOptions.html_parser;
+        if (wakoSource.html_parser) {
+            const wakoHtmlParser = wakoSource.html_parser;
 
             const rows = extractCssSelector(wakoHtmlParser.row)?.query;
             if (!rows) {
@@ -93,23 +109,28 @@ async function main() {
             };
 
             ferriteHtmlParser.title = extractCssSelector(wakoHtmlParser.title);
-            ferriteHtmlParser.size = extractCssSelector(wakoHtmlParser.size);
 
-            ferriteHtmlParser.sl = {
-                seeders: extractCssSelector(wakoHtmlParser.seeds)?.query,
-                leechers: extractCssSelector(wakoHtmlParser.peers)?.query
-            };
+            if (wakoHtmlParser.size) {
+                ferriteHtmlParser.size = extractCssSelector(wakoHtmlParser.size);
+            }
+
+            if (wakoHtmlParser.seeds || wakoHtmlParser.peers) {
+                ferriteHtmlParser.sl = {
+                    seeders: extractCssSelector(wakoHtmlParser.seeds)?.query,
+                    leechers: extractCssSelector(wakoHtmlParser.peers)?.query
+                };
+            }
 
             ferriteSource.htmlParser = ferriteHtmlParser;
         }
 
         // API parser
         // TODO: Move to a separate function for early returns
-        if (sourceOptions.json_format) {
+        if (wakoSource.json_format) {
             // The API URL is the same as the base URL. Requires manual editing
-            const ferriteApiInfo: FerriteApiInfo = { apiUrl: sourceOptions.base_url };
+            const ferriteApiInfo: FerriteApiInfo = { apiUrl: wakoSource.base_url };
 
-            const wakoJsonParser = sourceOptions.json_format;
+            const wakoJsonParser = wakoSource.json_format;
             const ferriteJsonParser: FerriteJsonParser = {
                 searchUrl: searchQuery,
                 results: wakoJsonParser.results,
@@ -125,13 +146,19 @@ async function main() {
                 continue;
             }
 
-            const ferriteSeedLeech: FerriteSeedLeech = {
-                seeders: wakoJsonParser.seeds,
-                leechers: wakoJsonParser.peers
-            };
-            ferriteJsonParser.sl = ferriteSeedLeech;
+            ferriteJsonParser.title = { query: wakoJsonParser.title };
 
-            ferriteJsonParser.size = { query: wakoJsonParser.size };
+            if (wakoJsonParser.size) {
+                ferriteJsonParser.size = { query: wakoJsonParser.size };
+            }
+
+            if (wakoJsonParser.seeds || wakoJsonParser.peers) {
+                const ferriteSeedLeech: FerriteSeedLeech = {
+                    seeders: wakoJsonParser.seeds,
+                    leechers: wakoJsonParser.peers
+                };
+                ferriteJsonParser.sl = ferriteSeedLeech;
+            }
 
             ferriteSource.api = ferriteApiInfo;
             ferriteSource.jsonParser = ferriteJsonParser;
@@ -141,8 +168,8 @@ async function main() {
     }
 
     const pluginObject = {
-        name: 'Wako Transcribed plugins (change this)',
-        author: 'Your name here!',
+        name: cleanNewlines(wakoManifest?.name ?? 'Wako Transcribed plugins (change this)'),
+        author: cleanNewlines(wakoManifest?.id?.trim() ?? 'Wako to Ferrite converter'),
         sources: finalSources
     };
     const sourceYaml = YAML.stringify(pluginObject);
