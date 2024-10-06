@@ -5,6 +5,8 @@ yarn.lock
 tsconfig.json
 .github/workflows
 dist/
+pnpm-lock.yaml
+README.md
 
 ferriteOutput.yml
 wako_input.json

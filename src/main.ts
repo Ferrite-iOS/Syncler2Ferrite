@@ -1,5 +1,5 @@
-import YAML from 'yaml';
-import { promises as fs } from 'fs';
+import YAML from "yaml";
+import { promises as fs } from "fs";
 import {
     FerriteSource,
     FerriteHtmlParser,
@@ -7,11 +7,11 @@ import {
     FerriteSeedLeech,
     FerriteApiInfo,
     FerriteComplexQuery
-} from './interfaces/Ferrite.js';
-import { WakoList, WakoCategory, WakoSource } from './interfaces/Wako.js';
+} from "./interfaces/Ferrite.js";
+import { WakoList, WakoCategory, WakoSource } from "./interfaces/Wako.js";
 
 function cleanNewlines(input: string) {
-    return input.replace(/(\r\n|\n|\r)/gm, ' ');
+    return input.replace(/(\r\n|\n|\r)/gm, " ");
 }
 
 // Extracts a CSS selector and attributes from a given JS function string
@@ -42,7 +42,7 @@ function extractCssSelector(input?: string) {
         query: queryResult
     };
 
-    if (!input.endsWith('textContent')) {
+    if (!input.endsWith("textContent")) {
         const attributeMatch = attributePattern.exec(input);
         const attributeName = attributeMatch?.[1];
         complexQuery.attribute = attributeName;
@@ -53,7 +53,7 @@ function extractCssSelector(input?: string) {
 
 async function main() {
     const finalSources: Array<FerriteSource> = [];
-    const inputText = await fs.readFile('wako_input.json', 'utf-8');
+    const inputText = await fs.readFile("wako_input.json", "utf-8");
     const wakoProviderJson: WakoList = JSON.parse(inputText);
 
     // Manifest entry
@@ -67,7 +67,7 @@ async function main() {
         let ferriteSource: FerriteSource = {
             name: wakoSource.name,
             version: 1,
-            minVersion: '0.7.2',
+            minVersion: "0.7.2",
             website: wakoSource.base_url
         };
 
@@ -75,15 +75,15 @@ async function main() {
             ferriteSource.fallbackUrls = wakoSource.fallback_urls;
         }
 
-        let searchQuery = '';
-        const searchUrlKeys: Array<keyof WakoSource> = ['movie', 'episode', 'season', 'anime'];
+        let searchQuery = "";
+        const searchUrlKeys: Array<keyof WakoSource> = ["movie", "episode", "season", "anime"];
         for (const key of searchUrlKeys) {
             if (searchQuery) {
                 break;
             }
 
             const category = wakoSource[key] as WakoCategory | undefined;
-            searchQuery = category?.query ?? '';
+            searchQuery = category?.query ?? "";
         }
 
         // HTML parser
@@ -172,12 +172,12 @@ async function main() {
     }
 
     const pluginObject = {
-        name: cleanNewlines(wakoManifest?.name ?? 'Wako Transcribed plugins (change this)'),
-        author: cleanNewlines(wakoManifest?.id?.trim() ?? 'Wako to Ferrite converter'),
+        name: cleanNewlines(wakoManifest?.name ?? "Wako Transcribed plugins (change this)"),
+        author: cleanNewlines(wakoManifest?.id?.trim() ?? "Wako to Ferrite converter"),
         sources: finalSources
     };
     const sourceYaml = YAML.stringify(pluginObject);
-    await fs.writeFile('ferriteOutput.yml', sourceYaml, 'utf-8');
+    await fs.writeFile("ferriteOutput.yml", sourceYaml, "utf-8");
 }
 
 await main();

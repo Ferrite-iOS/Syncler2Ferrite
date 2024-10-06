@@ -4,7 +4,7 @@ interface WakoSources {
 
 export type WakoList = {
     _manifest?: WakoManifest;
-} & Omit<WakoSources, '_manifest'>;
+} & Omit<WakoSources, "_manifest">;
 
 // Manifest isn't a thing in Helios's source code, but some lists have them
 export interface WakoManifest {
@@ -16,7 +16,7 @@ export interface WakoSource {
     name: string;
     base_url: string;
     fallback_urls?: Array<string>;
-    response_type: 'json' | 'text';
+    response_type: "json" | "text";
     source_is_in_sub_page?: boolean;
     movie?: WakoCategory;
     episode?: WakoCategory;
