@@ -9,6 +9,7 @@ import {
     FerriteComplexQuery
 } from "./interfaces/Ferrite.js";
 import { WakoList, WakoCategory, WakoSource } from "./interfaces/Wako.js";
+import { Command } from "commander";
 
 function cleanNewlines(input: string) {
     return input.replace(/(\r\n|\n|\r)/gm, " ");
@@ -52,8 +53,17 @@ function extractCssSelector(input?: string) {
 }
 
 async function main() {
+    const program = new Command();
+    program
+        .option("-i, --input <fileName>", "Wako source list name", "wako_input.json")
+        .option("-o, --output <fileName>", "Ferrite plugin YAML name", "ferriteOutput.yml")
+        .parse(process.argv);
+
+    const options = program.opts();
+
     const finalSources: Array<FerriteSource> = [];
-    const inputText = await fs.readFile("wako_input.json", "utf-8");
+
+    const inputText = await fs.readFile(options.input, "utf-8");
     const wakoProviderJson: WakoList = JSON.parse(inputText);
 
     // Manifest entry
@@ -177,7 +187,8 @@ async function main() {
         sources: finalSources
     };
     const sourceYaml = YAML.stringify(pluginObject);
-    await fs.writeFile("ferriteOutput.yml", sourceYaml, "utf-8");
+
+    await fs.writeFile(options.output, sourceYaml, "utf-8");
 }
 
 await main();
