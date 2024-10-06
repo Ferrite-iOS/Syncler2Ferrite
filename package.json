@@ -16,5 +16,8 @@
     "build": "tsc",
     "start": "node dist/main.js"
   },
-  "packageManager": "pnpm@8.6.3"
+  "packageManager": "pnpm@8.6.3",
+  "dependencies": {
+    "yaml": "^2.5.1"
+  }
 }
