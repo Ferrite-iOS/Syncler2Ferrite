@@ -9,7 +9,7 @@ import {
     FerriteComplexQuery,
     FerriteApiCredential
 } from "./interfaces/Ferrite.js";
-import { WakoList, WakoCategory, WakoSource } from "./interfaces/Wako.js";
+import { SynclerExpressList, SynclerCategory, SynclerSource } from "./interfaces/Syncler.js";
 import { Command } from "commander";
 
 function cleanNewlines(input: string) {
@@ -56,52 +56,54 @@ function extractCssSelector(input?: string) {
 async function main() {
     const program = new Command();
     program
-        .option("-i, --input <fileName>", "Wako source list name", "wako_input.json")
+        .option("-i, --input <fileName>", "Syncler source list name", "syncler_input.json")
         .option("-o, --output <fileName>", "Ferrite plugin YAML name", "ferriteOutput.yml")
         .parse(process.argv);
 
     const options = program.opts();
 
+    // Converted Ferrite sources
     const finalSources: Array<FerriteSource> = [];
 
+    // Read Syncler express list
     const inputText = await fs.readFile(options.input, "utf-8");
-    const wakoProviderJson: WakoList = JSON.parse(inputText);
+    const synclerExpressList: SynclerExpressList = JSON.parse(inputText);
 
     // Manifest entry
-    const wakoManifest = wakoProviderJson._manifest;
-    delete wakoProviderJson._manifest;
+    const synclerManifest = synclerExpressList._manifest;
+    delete synclerExpressList._manifest;
 
     // Sources
-    for (const sourceName of Object.keys(wakoProviderJson)) {
-        const wakoSource = wakoProviderJson[sourceName];
+    for (const sourceName of Object.keys(synclerExpressList)) {
+        const synclerSource = synclerExpressList[sourceName];
 
         let ferriteSource: FerriteSource = {
-            name: wakoSource.name,
+            name: synclerSource.name,
             version: 1,
             minVersion: "0.7.2",
-            website: wakoSource.base_url
+            website: synclerSource.base_url
         };
 
-        if (wakoSource.fallback_urls) {
-            ferriteSource.fallbackUrls = wakoSource.fallback_urls;
+        if (synclerSource.fallback_urls) {
+            ferriteSource.fallbackUrls = synclerSource.fallback_urls;
         }
 
         let searchQuery = "";
-        const searchUrlKeys: Array<keyof WakoSource> = ["movie", "episode", "season", "anime"];
+        const searchUrlKeys: Array<keyof SynclerSource> = ["movie", "episode", "season", "anime"];
         for (const key of searchUrlKeys) {
             if (searchQuery) {
                 break;
             }
 
-            const category = wakoSource[key] as WakoCategory | undefined;
+            const category = synclerSource[key] as SynclerCategory | undefined;
             searchQuery = category?.query ?? "";
         }
 
         // HTML parser
-        if (wakoSource.html_parser) {
-            const wakoHtmlParser = wakoSource.html_parser;
+        if (synclerSource.html_parser) {
+            const synclerHtmlParser = synclerSource.html_parser;
 
-            const rows = extractCssSelector(wakoHtmlParser.row)?.query;
+            const rows = extractCssSelector(synclerHtmlParser.row)?.query;
             if (!rows) {
                 console.log(
                     `Source ${sourceName} doesn't have a properly formatted row query. Skipping.`
@@ -109,7 +111,7 @@ async function main() {
                 continue;
             }
 
-            const magnet = extractCssSelector(wakoHtmlParser.url);
+            const magnet = extractCssSelector(synclerHtmlParser.url);
             if (!magnet) {
                 console.log(
                     `Source ${sourceName} doesn't have a properly formatted magnet query. Skipping.`
@@ -123,16 +125,16 @@ async function main() {
                 magnet: magnet
             };
 
-            ferriteHtmlParser.title = extractCssSelector(wakoHtmlParser.title);
+            ferriteHtmlParser.title = extractCssSelector(synclerHtmlParser.title);
 
-            if (wakoHtmlParser.size) {
-                ferriteHtmlParser.size = extractCssSelector(wakoHtmlParser.size);
+            if (synclerHtmlParser.size) {
+                ferriteHtmlParser.size = extractCssSelector(synclerHtmlParser.size);
             }
 
-            if (wakoHtmlParser.seeds || wakoHtmlParser.peers) {
+            if (synclerHtmlParser.seeds || synclerHtmlParser.peers) {
                 ferriteHtmlParser.sl = {
-                    seeders: extractCssSelector(wakoHtmlParser.seeds)?.query,
-                    leechers: extractCssSelector(wakoHtmlParser.peers)?.query
+                    seeders: extractCssSelector(synclerHtmlParser.seeds)?.query,
+                    leechers: extractCssSelector(synclerHtmlParser.peers)?.query
                 };
             }
 
@@ -141,49 +143,49 @@ async function main() {
 
         // API parser
         // TODO: Move to a separate function for early returns
-        if (wakoSource.json_format) {
+        if (synclerSource.json_format) {
             // The API URL is the same as the base URL. Requires manual editing
-            const ferriteApiInfo: FerriteApiInfo = { apiUrl: wakoSource.base_url };
+            const ferriteApiInfo: FerriteApiInfo = { apiUrl: synclerSource.base_url };
 
-            // This is some guesswork because Wako's docs are unclear
-            if (wakoSource.token) {
-                const wakoTokenHandler = wakoSource.token;
+            // This is some guesswork because syncler's docs are unclear
+            if (synclerSource.token) {
+                const synclerTokenHandler = synclerSource.token;
                 const ferriteCredential: FerriteApiCredential = {
-                    url: wakoTokenHandler.query,
-                    expiryLength: wakoTokenHandler.token_validity_time_ms,
+                    url: synclerTokenHandler.query,
+                    expiryLength: synclerTokenHandler.token_validity_time_ms,
                     responseType: "json",
-                    query: wakoTokenHandler.token_format.token
+                    query: synclerTokenHandler.token_format.token
                 };
 
                 ferriteApiInfo.clientSecret = ferriteCredential;
             }
 
-            const wakoJsonParser = wakoSource.json_format;
+            const synclerJsonParser = synclerSource.json_format;
             const ferriteJsonParser: FerriteJsonParser = {
                 searchUrl: searchQuery,
-                results: wakoJsonParser.results,
-                subResults: wakoJsonParser.sub_results
+                results: synclerJsonParser.results,
+                subResults: synclerJsonParser.sub_results
             };
 
-            if (wakoJsonParser.hash) {
-                ferriteJsonParser.magnetHash = { query: wakoJsonParser.hash };
-            } else if (wakoJsonParser.url) {
-                ferriteJsonParser.magnetLink = { query: wakoJsonParser.url };
+            if (synclerJsonParser.hash) {
+                ferriteJsonParser.magnetHash = { query: synclerJsonParser.hash };
+            } else if (synclerJsonParser.url) {
+                ferriteJsonParser.magnetLink = { query: synclerJsonParser.url };
             } else {
                 console.log(`Source ${sourceName} doesn't have a magnet link or hash. Skipping.`);
                 continue;
             }
 
-            ferriteJsonParser.title = { query: wakoJsonParser.title };
+            ferriteJsonParser.title = { query: synclerJsonParser.title };
 
-            if (wakoJsonParser.size) {
-                ferriteJsonParser.size = { query: wakoJsonParser.size };
+            if (synclerJsonParser.size) {
+                ferriteJsonParser.size = { query: synclerJsonParser.size };
             }
 
-            if (wakoJsonParser.seeds || wakoJsonParser.peers) {
+            if (synclerJsonParser.seeds || synclerJsonParser.peers) {
                 const ferriteSeedLeech: FerriteSeedLeech = {
-                    seeders: wakoJsonParser.seeds,
-                    leechers: wakoJsonParser.peers
+                    seeders: synclerJsonParser.seeds,
+                    leechers: synclerJsonParser.peers
                 };
                 ferriteJsonParser.sl = ferriteSeedLeech;
             }
@@ -196,8 +198,8 @@ async function main() {
     }
 
     const pluginObject = {
-        name: cleanNewlines(wakoManifest?.name ?? "Wako Transcribed plugins (change this)"),
-        author: cleanNewlines(wakoManifest?.id?.trim() ?? "Wako to Ferrite converter"),
+        name: cleanNewlines(synclerManifest?.name ?? "Syncler Transcribed plugins (change this)"),
+        author: cleanNewlines(synclerManifest?.id?.trim() ?? "Syncler2Ferrite"),
         sources: finalSources
     };
     const sourceYaml = YAML.stringify(pluginObject);

@@ -52,4 +52,4 @@ node_modules/
 
 # Input/output files
 ferriteOutput.yml
-wako_input.json
+syncler_input.json

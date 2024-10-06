@@ -1,33 +1,33 @@
-interface WakoSources {
-    [key: string]: WakoSource;
+interface SynclerSources {
+    [key: string]: SynclerSource;
 }
 
-export type WakoList = {
-    _manifest?: WakoManifest;
-} & Omit<WakoSources, "_manifest">;
+export type SynclerExpressList = {
+    _manifest?: SynclerManifest;
+} & Omit<SynclerSources, "_manifest">;
 
 // Manifest isn't a thing in Helios's source code, but some lists have them
-export interface WakoManifest {
+export interface SynclerManifest {
     name?: string;
     id?: string;
 }
 
-export interface WakoSource {
+export interface SynclerSource {
     name: string;
     base_url: string;
     fallback_urls?: Array<string>;
     response_type: "json" | "text";
-    token: WakoTokenHandler;
+    token: SynclerTokenHandler;
     source_is_in_sub_page?: boolean;
-    movie?: WakoCategory;
-    episode?: WakoCategory;
-    season?: WakoCategory;
-    anime?: WakoCategory;
-    json_format?: WakoApiParser;
-    html_parser?: WakoHtmlParser;
+    movie?: SynclerCategory;
+    episode?: SynclerCategory;
+    season?: SynclerCategory;
+    anime?: SynclerCategory;
+    json_format?: SynclerApiParser;
+    html_parser?: SynclerHtmlParser;
 }
 
-export interface WakoTokenHandler {
+export interface SynclerTokenHandler {
     query: string;
     token_validity_time_ms: number;
 
@@ -35,11 +35,11 @@ export interface WakoTokenHandler {
     token_format: { token: "token" };
 }
 
-export interface WakoCategory {
+export interface SynclerCategory {
     query: string;
 }
 
-export interface WakoApiParser {
+export interface SynclerApiParser {
     results?: string;
     sub_results?: string;
     url?: string;
@@ -52,7 +52,7 @@ export interface WakoApiParser {
     hash?: string;
 }
 
-export interface WakoHtmlParser {
+export interface SynclerHtmlParser {
     row: string;
     url: string;
     title: string;
