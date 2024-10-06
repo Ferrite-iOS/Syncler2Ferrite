@@ -205,6 +205,12 @@ async function main() {
     const sourceYaml = YAML.stringify(pluginObject);
 
     await fs.writeFile(options.output, sourceYaml, "utf-8");
+
+    console.log(`Successfully wrote the converted Ferrite plugin YAML to ${options.output}`);
+    console.log("Here be dragons!");
+    console.log(
+        "Make sure to test these sources. Conversion does not mean these will instantly work!"
+    );
 }
 
 await main();
