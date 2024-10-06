@@ -18,7 +18,17 @@ export interface FerriteSource {
 }
 
 export interface FerriteApiInfo {
-    apiUrl: string;
+    apiUrl?: string;
+    clientId?: FerriteApiCredential;
+    clientSecret?: FerriteApiCredential;
+}
+
+export interface FerriteApiCredential {
+    url?: string;
+    dynamic?: boolean;
+    expiryLength?: number;
+    responseType?: "json" | "text";
+    query?: string;
 }
 
 export interface FerriteJsonParser {

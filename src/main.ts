@@ -6,7 +6,8 @@ import {
     FerriteJsonParser,
     FerriteSeedLeech,
     FerriteApiInfo,
-    FerriteComplexQuery
+    FerriteComplexQuery,
+    FerriteApiCredential
 } from "./interfaces/Ferrite.js";
 import { WakoList, WakoCategory, WakoSource } from "./interfaces/Wako.js";
 import { Command } from "commander";
@@ -143,6 +144,19 @@ async function main() {
         if (wakoSource.json_format) {
             // The API URL is the same as the base URL. Requires manual editing
             const ferriteApiInfo: FerriteApiInfo = { apiUrl: wakoSource.base_url };
+
+            // This is some guesswork because Wako's docs are unclear
+            if (wakoSource.token) {
+                const wakoTokenHandler = wakoSource.token;
+                const ferriteCredential: FerriteApiCredential = {
+                    url: wakoTokenHandler.query,
+                    expiryLength: wakoTokenHandler.token_validity_time_ms,
+                    responseType: "json",
+                    query: wakoTokenHandler.token_format.token
+                };
+
+                ferriteApiInfo.clientSecret = ferriteCredential;
+            }
 
             const wakoJsonParser = wakoSource.json_format;
             const ferriteJsonParser: FerriteJsonParser = {

@@ -17,6 +17,7 @@ export interface WakoSource {
     base_url: string;
     fallback_urls?: Array<string>;
     response_type: "json" | "text";
+    token: WakoTokenHandler;
     source_is_in_sub_page?: boolean;
     movie?: WakoCategory;
     episode?: WakoCategory;
@@ -24,6 +25,14 @@ export interface WakoSource {
     anime?: WakoCategory;
     json_format?: WakoApiParser;
     html_parser?: WakoHtmlParser;
+}
+
+export interface WakoTokenHandler {
+    query: string;
+    token_validity_time_ms: number;
+
+    // Unsure what this means
+    token_format: { token: "token" };
 }
 
 export interface WakoCategory {
