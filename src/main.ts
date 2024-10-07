@@ -84,7 +84,7 @@ async function main() {
             website: synclerSource.base_url
         };
 
-        if (synclerSource.fallback_urls) {
+        if (synclerSource.fallback_urls && synclerSource.fallback_urls.length > 0) {
             ferriteSource.fallbackUrls = synclerSource.fallback_urls;
         }
 
@@ -96,7 +96,7 @@ async function main() {
             }
 
             const category = synclerSource[key] as SynclerCategory | undefined;
-            searchQuery = category?.query ?? "";
+            searchQuery = category?.query.replace("{titleFirstLetter}", "{queryFirstLetter}") ?? "";
         }
 
         // HTML parser
