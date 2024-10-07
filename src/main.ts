@@ -82,7 +82,12 @@ async function main() {
             name: synclerSource.name,
             version: 1,
             minVersion: "0.7.2",
-            website: synclerSource.base_url
+            website: synclerSource.base_url,
+            tags: [
+                {
+                    name: "Syncler2Ferrite"
+                }
+            ]
         };
 
         if (synclerSource.fallback_urls && synclerSource.fallback_urls.length > 0) {
@@ -123,6 +128,7 @@ async function main() {
             if (synclerSource.source_is_in_sub_page) {
                 magnet.externalLinkQuery = magnet.query;
                 magnet.query = "CSS SELECTOR FROM EXTERNAL LINK";
+                ferriteSource.tags?.push({ name: "Slow", color: "ff9500" });
             }
 
             const ferriteHtmlParser: FerriteHtmlParser = {

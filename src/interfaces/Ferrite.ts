@@ -11,10 +11,16 @@ export interface FerriteSource {
     website: string;
     fallbackUrls?: Array<string>;
     trackers?: Array<string>;
+    tags?: Array<FerriteTag>;
     api?: FerriteApiInfo;
     jsonParser?: FerriteJsonParser;
     rssParser?: FerriteRssParser;
     htmlParser?: FerriteHtmlParser;
+}
+
+export interface FerriteTag {
+    name: string;
+    color?: string;
 }
 
 export interface FerriteApiInfo {
