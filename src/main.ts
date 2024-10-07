@@ -129,6 +129,9 @@ async function main() {
                 magnet.externalLinkQuery = magnet.query;
                 magnet.query = "CSS SELECTOR FROM EXTERNAL LINK";
                 ferriteSource.tags?.push({ name: "Slow", color: "ff9500" });
+                console.log(
+                    `Source ${sourceName} has an external page magnet link. Please fill out the query CSS selector.`
+                );
             }
 
             const ferriteHtmlParser: FerriteHtmlParser = {
@@ -218,6 +221,7 @@ async function main() {
 
     await fs.writeFile(options.output, sourceYaml, "utf-8");
 
+    console.log();
     console.log(`Successfully wrote the converted Ferrite plugin YAML to ${options.output}`);
     console.log("Here be dragons!");
     console.log(
