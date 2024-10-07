@@ -7,7 +7,8 @@ import {
     FerriteSeedLeech,
     FerriteApiInfo,
     FerriteComplexQuery,
-    FerriteApiCredential
+    FerriteApiCredential,
+    FerriteMagnetLink
 } from "./interfaces/Ferrite.js";
 import { SynclerExpressList, SynclerCategory, SynclerSource } from "./interfaces/Syncler.js";
 import { Command } from "commander";
@@ -111,12 +112,17 @@ async function main() {
                 continue;
             }
 
-            const magnet = extractCssSelector(synclerHtmlParser.url);
+            const magnet = extractCssSelector(synclerHtmlParser.url) as FerriteMagnetLink;
             if (!magnet) {
                 console.log(
                     `Source ${sourceName} doesn't have a properly formatted magnet query. Skipping.`
                 );
                 continue;
+            }
+
+            if (synclerSource.source_is_in_sub_page) {
+                magnet.externalLinkQuery = magnet.query;
+                magnet.query = "CSS SELECTOR FROM EXTERNAL LINK";
             }
 
             const ferriteHtmlParser: FerriteHtmlParser = {

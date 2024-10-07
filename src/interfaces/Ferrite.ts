@@ -36,7 +36,7 @@ export interface FerriteJsonParser {
     results?: string;
     subResults?: string;
     magnetHash?: FerriteComplexQuery;
-    magnetLink?: FerriteComplexQuery;
+    magnetLink?: FerriteMagnetLink;
     subName?: FerriteComplexQuery;
     title?: FerriteComplexQuery;
     size?: FerriteComplexQuery;
@@ -48,7 +48,7 @@ export interface FerriteRssParser {
     searchUrl?: string;
     items: string;
     magnetHash?: FerriteComplexQuery;
-    magnetLink?: FerriteComplexQuery;
+    magnetLink?: FerriteMagnetLink;
     subName?: FerriteComplexQuery;
     title?: FerriteComplexQuery;
     size?: FerriteComplexQuery;
@@ -58,7 +58,7 @@ export interface FerriteRssParser {
 export interface FerriteHtmlParser {
     searchUrl: string;
     rows: string;
-    magnet: FerriteComplexQuery;
+    magnet: FerriteMagnetLink;
     subName?: FerriteComplexQuery;
     title?: FerriteComplexQuery;
     size?: FerriteComplexQuery;
@@ -70,6 +70,10 @@ export interface FerriteComplexQuery {
     attribute?: string;
     discriminator?: string;
     regex?: string;
+}
+
+export interface FerriteMagnetLink extends FerriteComplexQuery {
+    externalLinkQuery?: string;
 }
 
 export interface FerriteSeedLeech {
